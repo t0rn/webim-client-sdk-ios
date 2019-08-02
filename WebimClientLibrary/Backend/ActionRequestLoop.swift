@@ -131,22 +131,12 @@ class ActionRequestLoop: AbstractRequestLoop {
             
             do {
                 let data = try self.perform(request: urlRequest!)
-                //Flatten nested optionals resulting from 'try?'
-                //see https://github.com/apple/swift-evolution/blob/master/proposals/0230-flatten-optional-try.md
-                #if swift(<5.0)
                 guard let optionalDataJSON = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
                     let dataJSON = optionalDataJSON  else {
                         WebimInternalLogger.shared.log(entry: "Error de-serializing server response: \(String(data: data, encoding: .utf8) ?? "unreadable data")",
                             verbosityLevel: .WARNING)
                         return
                 }
-                #else
-                guard let dataJSON = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
-                    WebimInternalLogger.shared.log(entry: "Error de-serializing server response: \(String(data: data, encoding: .utf8) ?? "unreadable data")",
-                        verbosityLevel: .WARNING)
-                    return
-                }
-                #endif
                 if let error = dataJSON[AbstractRequestLoop.ResponseFields.error.rawValue] as? String {
                     switch error {
                     case WebimInternalError.reinitializationRequired.rawValue:

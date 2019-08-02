@@ -87,17 +87,9 @@ class FAQRequestLoop: AbstractRequestLoop {
             
             do {
                 let data = try self.perform(request: urlRequest!)
-                //Flatten nested optionals resulting from 'try?'
-                //see https://github.com/apple/swift-evolution/blob/master/proposals/0230-flatten-optional-try.md
-                #if swift(<5)
                 guard let optionalDataJSON = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
                     let dataJSON = optionalDataJSON
                     else { return }
-                #else
-                guard let dataJSON = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
-                    else { return }
-                #endif
-                
                 if (dataJSON[AbstractRequestLoop.ResponseFields.error.rawValue] as? String) != nil {
                     self.running = false
                     return
